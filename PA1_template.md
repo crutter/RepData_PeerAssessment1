@@ -1,31 +1,31 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
-```{r results='hide'}
+
+```r
   dat<-read.csv('activity.csv')
 ```
 
 
 ## What is mean total number of steps taken per day?
-```{r }
+
+```r
 options(scipen =1, digits=2)
 stepsday<- tapply(dat$steps, dat$date, sum)
 mn<-round(mean(stepsday, na.rm=T), digits=2)
 med<-median(stepsday, na.rm=T)
 hist(stepsday,breaks = 61, main='Histogram of daily steps', xlab='Steps per day')
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
   
-*Mean* steps per day = **`r mn`**  
-*Median* steps per day = **`r med`**  
+*Mean* steps per day = **10766.19**  
+*Median* steps per day = **10765**  
 
 ## What is the average daily activity pattern?
-```{r}
+
+```r
 stepsint<-tapply(dat$steps, dat$interval, function(x) mean(x, na.rm=T))
 stepsintdf<-data.frame(stepsint)
 stepsintdf$interval<-row.names(stepsintdf)
@@ -36,10 +36,13 @@ plot(stepsintdf$stepsint~stepsintdf$interval,type='l',
 abline(v=maxint, col='red')
 ```
 
-The 5 minute interval with the *maximum number of average steps* is interval **`r maxint`**  
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+
+The 5 minute interval with the *maximum number of average steps* is interval **835**  
 
 ## Imputing missing values
-```{r}
+
+```r
 noNAb<-sum(is.na(dat))
 datimp<-dat
 for(i in 1:nrow(datimp)){
@@ -53,17 +56,23 @@ stepsday2<- tapply(datimp$steps, datimp$date, sum)
 mn2<-round(mean(stepsday2, na.rm=T), digits=2)
 med2<-median(stepsday2, na.rm=T)
 hist(stepsday2,breaks = 61, main='Histogram of daily steps', xlab='Steps per day')
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+
+```r
 steptest<-t.test(stepsday, stepsday2)
 ```
 
-The number of *missing values* in the original dataset is `r noNAb`  
-The *mean* steps per day is **`r mn2`**  
-The *median* steps per day is **`r med2`**  
-There was ***no significant difference*** between means with a **p value of `r steptest$p.value`**
+The number of *missing values* in the original dataset is 2304  
+The *mean* steps per day is **10766.19**  
+The *median* steps per day is **10766.19**  
+There was ***no significant difference*** between means with a **p value of 1**
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r cache=TRUE, fig.height=10}
+
+```r
 datimp$date<-as.Date(datimp$date)
 for (i in 1:nrow(datimp)){
   if(weekdays(datimp$date[i]) %in% c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')){
@@ -92,9 +101,28 @@ plot(interval_mean$weekend_means~interval_mean$interval, type='l',
      col='blue',
      ylim=c(0, 225))
 abline(h=mean(interval_mean$weekend_means), lty=2)
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
+
+```r
 weektest<-t.test(interval_mean$weekday_means, interval_mean$weekend_means)
 weektest
 ```
 
+```
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  interval_mean$weekday_means and interval_mean$weekend_means
+## t = -1.9, df = 574, p-value = 0.05455
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -13.64   0.13
+## sample estimates:
+## mean of x mean of y 
+##        36        42
+```
+
 There appears to be *more* activity on average on the **weekends** than on **weekdays**. The hash lines on each graph represent the average 
-steps per 5 minute interval. Average steps per interval on *weekdays* is **`r mean(interval_mean$weekday_means)`**, and on the *weekend* is **`r mean(interval_mean$weekend_means)`**. The p-value for this difference is **`r weektest$p.value`**. 
+steps per 5 minute interval. Average steps per interval on *weekdays* is **35.61**, and on the *weekend* is **42.37**. The p-value for this difference is **0.05**. 
